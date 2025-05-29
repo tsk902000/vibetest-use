@@ -1,6 +1,7 @@
-# Vibetest MCP
+# Vibetest-Use MCP
 
-![vibetest demo](https://github.com/user-attachments/assets/your-gif-hash-here/demo.gif)
+![vibetest demo](https://i.imgur.com/54Ik7oB.gif)
+
 
 An MCP server that launches multiple Browser-Use agents to test a vibe-coded website for UI bugs, broken links, accessibility issues, and other technical problems.
 
@@ -66,9 +67,6 @@ claude code
 - **Number of agents**: `3` (default), `5 agents`, `2 agents` - more agents = more thorough testing
 - **Headless mode**: `non-headless` (default) or `headless`
 
-
-
-
 ## Requirements
 
 - Python 3.11+
@@ -85,4 +83,4 @@ MIT
 
 ---
 
-Powered by [browser-use](https://github.com/browser-use/browser-use) 
+Powered by [Browser Use](https://github.com/browser-use/browser-use) 

@@ -75,9 +75,13 @@ claude code
 - Google API key ([get one](https://developers.google.com/maps/api-security-best-practices)) (we support gemini-2.0-flash)
 - Cursor/Claude with MCP support
 
-## Demo
+## Full Demo
 
-![Demo Video](assets/demo.mp4)
+
+
+https://github.com/user-attachments/assets/062d978a-a7d9-4eb5-8e8b-53b97ad9e8c0
+
+
 
 ## License
 

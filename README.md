@@ -1,7 +1,9 @@
 # Vibetest-Use MCP
 
-![vibetest demo](https://i.imgur.com/54Ik7oB.gif)
-
+<div align="center">
+  <img src="https://i.imgur.com/54Ik7oB.gif" alt="vibetest demo" width="80%">
+</div>
+<br/>
 
 An MCP server that launches multiple Browser-Use agents to test a vibe-coded website for UI bugs, broken links, accessibility issues, and other technical problems.
 

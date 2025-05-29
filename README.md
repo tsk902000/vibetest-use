@@ -1,11 +1,6 @@
 # Vibetest Use
 
-<div align="center">
-  <video width="80%" controls loop muted>
-    <source src="https://github.com/user-attachments/assets/55ba5171-e75f-4ac7-baa7-ab77ca76f970" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
+https://github.com/user-attachments/assets/55ba5171-e75f-4ac7-baa7-ab77ca76f970
 
 An MCP server that launches multiple Browser-Use agents to test a vibe-coded website for UI bugs, broken links, accessibility issues, and other technical problems.
 

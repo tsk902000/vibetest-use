@@ -1,9 +1,7 @@
 # Vibetest Use
 
 <div align="center">
-  
-  <img src="https://i.imgur.com/54Ik7oB.gif" alt="vibetest demo" width="80%">
-  
+<img src="https://i.imgur.com/54Ik7oB.gif" alt="vibetest demo" width="80%">
 </div>
 <br/>
 

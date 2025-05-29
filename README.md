@@ -78,8 +78,7 @@ claude code
 ## Full Demo
 
 
-
-https://github.com/user-attachments/assets/062d978a-a7d9-4eb5-8e8b-53b97ad9e8c0
+https://github.com/user-attachments/assets/6450b5b7-10e5-4019-82a4-6d726dbfbe1f
 
 
 

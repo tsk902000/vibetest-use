@@ -1,9 +1,12 @@
-# Vibetest-Use MCP
+# Vibetest Use
 
 <div align="center">
+  
   <img src="https://i.imgur.com/54Ik7oB.gif" alt="vibetest demo" width="80%">
+  
 </div>
 <br/>
+
 
 An MCP server that launches multiple Browser-Use agents to test a vibe-coded website for UI bugs, broken links, accessibility issues, and other technical problems.
 
@@ -24,10 +27,10 @@ uv pip install -e .
 
 ```bash
 # Add MCP server via CLI
-claude mcp add vibetest /path/to/vibetest-use/.venv/bin/vibetest-mcp -e GOOGLE_API_KEY="your_api_key"
+claude mcp add vibetest /full/path/to/vibetest-use/.venv/bin/vibetest-mcp -e GOOGLE_API_KEY="your_api_key"
 
 # Test in Claude Code
-claude code
+> claude
 
 > /mcp 
   ⎿  MCP Server Status
@@ -47,7 +50,7 @@ claude code
 {
   "mcpServers": {
     "vibetest": {
-      "command": "/path/to/vibetest-use/.venv/bin/vibetest-mcp",
+      "command": "/full/path/to/vibetest-use/.venv/bin/vibetest-mcp",
       "env": {
         "GOOGLE_API_KEY": "your_api_key"
       }

@@ -1,6 +1,8 @@
 # Vibetest Use
 
-<img src="https://i.imgur.com/QIWaSJb.gif" width="300"/>
+<div align="center">
+  <img src="https://i.imgur.com/QIWaSJb.gif" width="500"/>
+</div>
 
 An MCP server that launches multiple Browser-Use agents to test a vibe-coded website for UI bugs, broken links, accessibility issues, and other technical problems.
 

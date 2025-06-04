@@ -10,11 +10,6 @@ Perfect for testing both live websites and localhost development sites.
 
 Vibecode and vibetest until your website works.
 
-## Add to Cursor in one click:
-
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=vibetest&config=eyJjb21tYW5kIjoiL2Z1bGwvcGF0aC90by92aWJldGVzdC11c2UvLnZlbnYvYmluL3ZpYmV0ZXN0LW1jcCIsImVudiI6eyJHT09HTEVfQVBJX0tFWSI6InlvdXJfYXBpX2tleSJ9fQ==)
-
-
 ## Quick Start
 
 ```bash

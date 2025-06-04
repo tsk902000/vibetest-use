@@ -12,7 +12,7 @@ Vibecode and vibetest until your website works.
 
 ## Add to Cursor in one click:
 
-<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=vibetest&config=eyJjb21tYW5kIjoiL2Z1bGwvcGF0aC90by92aWJldGVzdC11c2UvLnZlbnYvYmluL3ZpYmV0ZXN0LW1jcCIsImVudiI6eyJHT09HTEVfQVBJX0tFWSI6InlvdXJfYXBpX2tleSJ9fQ=="><img src="https://cursor.com/deeplink/mcp-install-dark.png" alt="Add vibetest MCP server to Cursor" style="max-height: 32px;" /></a>
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=vibetest&config=eyJjb21tYW5kIjoiL2Z1bGwvcGF0aC90by92aWJldGVzdC11c2UvLnZlbnYvYmluL3ZpYmV0ZXN0LW1jcCIsImVudiI6eyJHT09HTEVfQVBJX0tFWSI6InlvdXJfYXBpX2tleSJ9fQ==)
 
 
 ## Quick Start

@@ -1,11 +1,15 @@
 import asyncio, os, uuid, json, time
 from browser_use import Agent, BrowserSession, BrowserProfile
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# OpenAI-compatible API configuration
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
+OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.9"))
 
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY environment variable is required. Set it in your MCP config or environment.")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY environment variable is required. Set it in your MCP config or environment.")
 
 _test_results = {}
 
@@ -23,11 +27,12 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
     start_time = time.time()
     
     qa_tasks = await scout_page(base_url)
-    
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0.9,
-        google_api_key=GOOGLE_API_KEY
+ 
+    llm = ChatOpenAI(
+                model=OPENAI_MODEL,
+                api_key=OPENAI_API_KEY,
+                base_url=OPENAI_BASE_URL,
+                temperature=OPENAI_TEMPERATURE,
     )
 
     async def run_single_agent(i: int):
@@ -227,14 +232,13 @@ def summarize_bug_reports(test_id: str) -> dict:
     }
 
     # llm analysis of findings
-    if bug_reports and GOOGLE_API_KEY:
+    if bug_reports and OPENAI_API_KEY:
         try:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            
-            client = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
-                google_api_key=GOOGLE_API_KEY,
-                temperature=0.1,
+            client = ChatOpenAI(
+                model=OPENAI_MODEL,
+                api_key=OPENAI_API_KEY,
+                base_url=OPENAI_BASE_URL,
+                temperature=OPENAI_TEMPERATURE,
             )
 
             prompt = f"""
@@ -333,7 +337,7 @@ Only include real issues found during testing. Provide clear, concise descriptio
                 "severity_breakdown": severity_analysis,
                 "llm_analysis": {
                     "raw_response": response.content,
-                    "model_used": "gemini-1.5-flash"
+                    "model_used": OPENAI_MODEL
                 }
             })
             
@@ -370,10 +374,11 @@ Only include real issues found during testing. Provide clear, concise descriptio
 async def scout_page(base_url: str) -> list:
     """Scout agent that identifies all interactive elements on the page"""
     try:
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+        llm = ChatOpenAI(
+            model=OPENAI_MODEL,
             temperature=0.1,
-            google_api_key=GOOGLE_API_KEY
+            api_key=OPENAI_API_KEY,
+            base_url=OPENAI_BASE_URL
         )
         
         browser_profile = BrowserProfile(

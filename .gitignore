@@ -1,5 +1,5 @@
 # Build artifacts
-
+*.bat
 build/
 dist/
 __pycache__/

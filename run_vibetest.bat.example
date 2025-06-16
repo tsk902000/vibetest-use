@@ -1,0 +1,9 @@
+@echo off
+set OPENAI_API_KEY=apikey
+set OPENAI_BASE_URL=baseurl
+set OPENAI_MODEL=model
+set OPENAI_TEMPERATURE=0.7
+echo Starting Vibetest on Google.com...
+echo.
+python run_vibetest.py
+pause

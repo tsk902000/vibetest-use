@@ -12,7 +12,7 @@ Vibecode and vibetest until your website works.
 
 ## Add to Cursor in one click:
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=vibetest&config=eyJjb21tYW5kIjoiL2Z1bGwvcGF0aC90by92aWJldGVzdC11c2UvLnZlbnYvYmluL3ZpYmV0ZXN0LW1jcCIsImVudiI6eyJHT09HTEVfQVBJX0tFWSI6InlvdXJfYXBpX2tleSJ9fQ==)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=vibetest&config=eyJjb21tYW5kIjoiL2Z1bGwvcGF0aC90by92aWJldGVzdC11c2UvLnZlbnYvYmluL3ZpYmV0ZXN0LW1jcCIsImVudiI6eyJPUEVOQUlfQVBJX0tFWSI6InlvdXJfYXBpX2tleSJ9fQ==)
 
 
 ## Quick Start
@@ -28,13 +28,13 @@ uv pip install -e .
 
 ```bash
 # Add MCP server via CLI
-claude mcp add vibetest /full/path/to/vibetest-use/.venv/bin/vibetest-mcp -e GOOGLE_API_KEY="your_api_key"
+claude mcp add vibetest /full/path/to/vibetest-use/.venv/bin/vibetest-mcp -e OPENAI_API_KEY="your_api_key"
 
 # Test in Claude Code
 > claude
 
-> /mcp 
-  ⎿  MCP Server Status
+> /mcp
+  ⎿  MCP Server Status
 
      • vibetest: connected
 ```
@@ -53,7 +53,10 @@ claude mcp add vibetest /full/path/to/vibetest-use/.venv/bin/vibetest-mcp -e GOO
     "vibetest": {
       "command": "/full/path/to/vibetest-use/.venv/bin/vibetest-mcp",
       "env": {
-        "GOOGLE_API_KEY": "your_api_key"
+        "OPENAI_API_KEY": "your_api_key",
+        "OPENAI_BASE_URL": "https://api.openai.com/v1",
+        "OPENAI_MODEL": "gpt-4",
+        "OPENAI_TEMPERATURE": "0.9"
       }
     }
   }
@@ -76,8 +79,40 @@ claude mcp add vibetest /full/path/to/vibetest-use/.venv/bin/vibetest-mcp -e GOO
 ## Requirements
 
 - Python 3.11+
-- Google API key ([get one](https://developers.google.com/maps/api-security-best-practices)) (we support gemini-2.0-flash)
+- OpenAI API key or OpenAI-compatible API (OpenAI, Azure OpenAI, Anthropic, local models via Ollama, etc.)
 - Cursor/Claude with MCP support
+
+## Configuration
+
+The following environment variables can be configured:
+
+- `OPENAI_API_KEY` (required): Your API key
+- `OPENAI_BASE_URL` (optional): API base URL (default: `https://api.openai.com/v1`)
+- `OPENAI_MODEL` (optional): Model to use (default: `gpt-4`)
+- `OPENAI_TEMPERATURE` (optional): Temperature setting (default: `0.9`)
+
+### Examples for different providers:
+
+**OpenAI:**
+```bash
+OPENAI_API_KEY="sk-..."
+OPENAI_BASE_URL="https://api.openai.com/v1"
+OPENAI_MODEL="gpt-4"
+```
+
+**Azure OpenAI:**
+```bash
+OPENAI_API_KEY="your-azure-key"
+OPENAI_BASE_URL="https://your-resource.openai.azure.com/openai/deployments/your-deployment"
+OPENAI_MODEL="gpt-4"
+```
+
+**Local Ollama:**
+```bash
+OPENAI_API_KEY="ollama"
+OPENAI_BASE_URL="http://localhost:11434/v1"
+OPENAI_MODEL="llama2"
+```
 
 ## Full Demo
 

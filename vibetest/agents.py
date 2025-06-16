@@ -1,45 +1,11 @@
 import asyncio, os, uuid, json, time
-import requests
 from browser_use import Agent, BrowserSession, BrowserProfile
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-# OpenAI-compatible API configuration
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-API_KEY = os.getenv("API_KEY")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o-mini")
-DEFAULT_TEMPERATURE = float(os.getenv("DEFAULT_TEMPERATURE", "0.9"))
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-if not API_KEY:
-    raise ValueError("API_KEY environment variable is required. Set it in your MCP config or environment.")
-
-# OpenAILLM class implementation
-class OpenAILLM:
-    def __init__(self, base_url, api_key, model, temperature):
-        self.base_url = base_url
-        self.api_key = api_key
-        self.model = model
-        self.temperature = temperature
-        self.headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
-
-    def invoke(self, prompt):
-        url = f"{self.base_url}/chat/completions"
-        payload = {
-            "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": self.temperature
-        }
-
-        response = requests.post(url, headers=self.headers, json=payload)
-        response.raise_for_status()
-        return response.json()
-
-    async def invoke_async(self, prompt):
-        return await asyncio.to_thread(self.invoke, prompt)
-
-    def __call__(self, prompt):
-        return self.invoke(prompt)
+if not GOOGLE_API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable is required. Set it in your MCP config or environment.")
 
 _test_results = {}
 
@@ -55,59 +21,58 @@ def get_screen_dimensions():
 async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -> str:
     test_id = str(uuid.uuid4())
     start_time = time.time()
-
+    
     qa_tasks = await scout_page(base_url)
-
-    llm = OpenAILLM(
-        base_url=API_BASE_URL,
-        api_key=API_KEY,
-        model=DEFAULT_MODEL,
-        temperature=DEFAULT_TEMPERATURE
+    
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash",
+        temperature=0.9,
+        google_api_key=GOOGLE_API_KEY
     )
 
     async def run_single_agent(i: int):
         task_description = qa_tasks[i % len(qa_tasks)]
-
+        
         try:
             # browser configuration
             browser_args = ['--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage']
             if headless:
                 browser_args.append('--headless=new')
-
+            
             window_config = {}
-
+            
             if not headless:
                 # window positioning for non-headless mode
                 screen_width, screen_height = get_screen_dimensions()
-
+                
                 window_width = 300
                 window_height = 400
                 viewport_width = 280
                 viewport_height = 350
-
+                
                 margin = 10
                 spacing = 15
-
+                
                 usable_width = screen_width - (2 * margin)
                 windows_per_row = max(1, usable_width // (window_width + spacing))
-
+                
                 row = i // windows_per_row
                 col = i % windows_per_row
-
+                
                 x_offset = margin + col * (window_width + spacing)
                 y_offset = margin + row * (window_height + spacing)
-
+                
                 if x_offset + window_width > screen_width:
                     x_offset = screen_width - window_width - margin
                 if y_offset + window_height > screen_height:
                     y_offset = screen_height - window_height - margin
-
+                
                 window_config = {
                     "window_size": {"width": window_width, "height": window_height},
                     "window_position": {"width": x_offset, "height": y_offset},
                     "viewport": {"width": viewport_width, "height": viewport_height}
                 }
-
+            
             browser_profile = BrowserProfile(
                 headless=headless,
                 disable_security=True,
@@ -119,12 +84,12 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
                 wait_between_actions=0.5,
                 **window_config
             )
-
+            
             browser_session = BrowserSession(
                 browser_profile=browser_profile,
                 headless=headless
             )
-
+            
             # zoom setup for non-headless mode
             if not headless:
                 try:
@@ -139,12 +104,12 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
                                 """)
                             except Exception:
                                 pass
-
+                        
                         page.on("load", lambda: asyncio.create_task(apply_zoom(page)))
                         page.on("domcontentloaded", lambda: asyncio.create_task(apply_zoom(page)))
                 except Exception:
                     pass
-
+            
             # run agent
             agent = Agent(
                 task=task_description,
@@ -152,12 +117,12 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
                 browser_session=browser_session,
                 use_vision=True
             )
-
+            
             history = await agent.run()
             await browser_session.close()
-
+            
             result_text = str(history.final_result()) if hasattr(history, 'final_result') else str(history)
-
+            
             return {
                 "agent_id": i,
                 "task": task_description,
@@ -165,14 +130,14 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
                 "timestamp": time.time(),
                 "status": "success"
             }
-
+            
         except Exception as e:
             try:
                 if 'browser_session' in locals():
                     await browser_session.close()
             except:
                 pass
-
+                
             return {
                 "agent_id": i,
                 "task": task_description,
@@ -183,18 +148,18 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
 
     # run agents in parallel
     semaphore = asyncio.Semaphore(min(num_agents, 10))
-
+    
     async def run_agent_with_semaphore(i: int):
         async with semaphore:
             return await run_single_agent(i)
-
+    
     results = await asyncio.gather(
-        *[run_agent_with_semaphore(i) for i in range(num_agents)],
+        *[run_agent_with_semaphore(i) for i in range(num_agents)], 
         return_exceptions=True
     )
-
+    
     end_time = time.time()
-
+    
     # cleanup lingering browser processes
     try:
         import subprocess
@@ -204,7 +169,7 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
             subprocess.run(['pkill', '-f', 'chromium'], capture_output=True, check=False)
     except Exception:
         pass
-
+    
     # store results
     test_data = {
         "test_id": test_id,
@@ -216,10 +181,11 @@ async def run_pool(base_url: str, num_agents: int = 3, headless: bool = False) -
         "results": [r for r in results if not isinstance(r, Exception)],
         "status": "completed"
     }
-
+    
     _test_results[test_id] = test_data
-
+    
     return test_id
+
 
 # === Standardized summarization with severity classification ===
 def summarize_bug_reports(test_id: str) -> dict:
@@ -227,12 +193,12 @@ def summarize_bug_reports(test_id: str) -> dict:
         return {"error": f"Test ID {test_id} not found"}
 
     test_data = _test_results[test_id]
-
+    
     # separate results and prepare for analysis
     agent_results = []
     bug_reports = []
     errors = []
-
+    
     for result in test_data["results"]:
         if result["status"] == "success":
             agent_results.append(result)
@@ -261,13 +227,14 @@ def summarize_bug_reports(test_id: str) -> dict:
     }
 
     # llm analysis of findings
-    if bug_reports and API_KEY:
+    if bug_reports and GOOGLE_API_KEY:
         try:
-            client = OpenAILLM(
-                base_url=API_BASE_URL,
-                api_key=API_KEY,
-                model=DEFAULT_MODEL,
-                temperature=0.1
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            
+            client = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash",
+                google_api_key=GOOGLE_API_KEY,
+                temperature=0.1,
             )
 
             prompt = f"""
@@ -314,17 +281,14 @@ Only include real issues found during testing. Provide clear, concise descriptio
 """
 
             response = client.invoke(prompt)
-
+            
             # parse json response and calculate severity
             try:
-                # Extract content from response
-                content = response.get('choices', [{}])[0].get('message', {}).get('content', '')
-
-                # Try to parse as JSON
-                try:
-                    severity_analysis = json.loads(content)
-                except:
-                    # If not valid JSON, use empty analysis
+                import re
+                json_match = re.search(r'\{.*\}', response.content, re.DOTALL)
+                if json_match:
+                    severity_analysis = json.loads(json_match.group())
+                else:
                     severity_analysis = {
                         "high_severity": [],
                         "medium_severity": [],
@@ -336,13 +300,13 @@ Only include real issues found during testing. Provide clear, concise descriptio
                     "medium_severity": [],
                     "low_severity": []
                 }
-
+            
             total_issues = (
                 len(severity_analysis.get("high_severity", [])) +
                 len(severity_analysis.get("medium_severity", [])) +
                 len(severity_analysis.get("low_severity", []))
             )
-
+            
             # determine overall status
             if len(severity_analysis.get("high_severity", [])) > 0:
                 overall_status = "high-severity"
@@ -360,7 +324,7 @@ Only include real issues found during testing. Provide clear, concise descriptio
                 overall_status = "passing"
                 status_emoji = "✅"
                 status_description = "No technical issues detected during testing"
-
+            
             summary.update({
                 "overall_status": overall_status,
                 "status_emoji": status_emoji,
@@ -368,11 +332,11 @@ Only include real issues found during testing. Provide clear, concise descriptio
                 "total_issues": total_issues,
                 "severity_breakdown": severity_analysis,
                 "llm_analysis": {
-                    "raw_response": response.get('choices', [{}])[0].get('message', {}).get('content', ''),
-                    "model_used": DEFAULT_MODEL
+                    "raw_response": response.content,
+                    "model_used": "gemini-1.5-flash"
                 }
             })
-
+            
         except Exception as e:
             # fallback analysis
             summary.update({
@@ -406,13 +370,12 @@ Only include real issues found during testing. Provide clear, concise descriptio
 async def scout_page(base_url: str) -> list:
     """Scout agent that identifies all interactive elements on the page"""
     try:
-        llm = OpenAILLM(
-            base_url=API_BASE_URL,
-            api_key=API_KEY,
-            model=DEFAULT_MODEL,
-            temperature=0.1
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash",
+            temperature=0.1,
+            google_api_key=GOOGLE_API_KEY
         )
-
+        
         browser_profile = BrowserProfile(
             headless=True,
             disable_security=True,
@@ -422,23 +385,23 @@ async def scout_page(base_url: str) -> list:
             maximum_wait_page_load_time=8.0,
             wait_between_actions=0.5
         )
-
+        
         browser_session = BrowserSession(browser_profile=browser_profile, headless=True)
-
+        
         scout_task = f"""Visit {base_url} and identify ALL interactive elements on the page. Do NOT click anything, just observe and catalog what's available. List buttons, links, forms, input fields, menus, dropdowns, and any other clickable elements you can see. Provide a comprehensive inventory."""
-
+        
         agent = Agent(
             task=scout_task,
             llm=llm,
             browser_session=browser_session,
             use_vision=True
         )
-
+        
         history = await agent.run()
         await browser_session.close()
-
+        
         scout_result = str(history.final_result()) if hasattr(history, 'final_result') else str(history)
-
+        
         # partition elements with llm
         partition_prompt = f"""
 Based on this scout report of interactive elements found on {base_url}:
@@ -456,17 +419,15 @@ Format as JSON array:
 
 Make each task very specific about which exact elements to test.
 """
-
+        
         partition_response = llm.invoke(partition_prompt)
-
+        
         # parse response
-        # Extract content from response
-        content = partition_response.get('choices', [{}])[0].get('message', {}).get('content', '')
-
-        # Try to parse as JSON
-        try:
-            element_tasks = json.loads(content)
-        except:
+        import re
+        json_match = re.search(r'\[.*\]', partition_response.content, re.DOTALL)
+        if json_match:
+            element_tasks = json.loads(json_match.group())
+        else:
             # fallback tasks
             element_tasks = [
                 f"Test navigation elements in the header area of {base_url}",
@@ -476,9 +437,9 @@ Make each task very specific about which exact elements to test.
                 f"Test sidebar or secondary navigation in {base_url}",
                 f"Test any remaining interactive elements in {base_url}"
             ]
-
+        
         return element_tasks
-
+        
     except Exception as e:
         # fallback tasks if scouting fails
         return [
